@@ -39,7 +39,7 @@ def generate_text():
         ]
     )
 
-    return jsonify({"text": response.choices[0].message['content'].strip()})
+    return jsonify({"text": response.choices[0].message.strip()})
 
 if __name__ == "__main__":
     app.run()
