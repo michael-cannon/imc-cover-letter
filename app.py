@@ -16,9 +16,26 @@ assistant_id = os.getenv('ASSISTANT_ID')
 
 app = Flask(__name__, static_folder='static')
 
+# Dummy user credentials
+USER_CREDENTIALS = {
+    "username": "testuser",
+    "password": "testpass"
+}
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    if username == USER_CREDENTIALS['username'] and password == USER_CREDENTIALS['password']:
+        return jsonify({"message": "Login successful"}), 200
+    else:
+        return jsonify({"message": "Invalid credentials"}), 401
 
 @app.route('/generate', methods=['POST'])
 def generate_text():

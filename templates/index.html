@@ -8,27 +8,9 @@
 </head>
 <body>
     <h1>Cover Letter Generator</h1>
-    <form id="generate-form">
-        <label for="prompt">Enter your prompt:</label>
-        <textarea id="prompt" name="prompt" rows="4" cols="50"></textarea>
-        <button type="submit">Generate</button>
-    </form>
+    {% include 'login_form.html' %}
+    {% include 'generate_form.html' %}
     <div id="result"></div>
-
-    <script>
-        document.getElementById('generate-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const prompt = document.getElementById('prompt').value;
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ prompt })
-            });
-            const data = await response.json();
-            document.getElementById('result').innerText = data.text;
-        });
-    </script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
