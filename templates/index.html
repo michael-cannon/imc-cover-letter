@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMC Cover Letter</title>
+    <title>Chat Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
         async function sendMessage() {
             const message = document.getElementById('message').value;
-            const threadId = localStorage.getItem('thread_id') || null;
+            let threadId = localStorage.getItem('thread_id') || '';
 
             const response = await fetch('/chat', {
                 method: 'POST',
@@ -18,15 +19,42 @@
             });
 
             const data = await response.json();
-            document.getElementById('response').innerText = data.response;
-            localStorage.setItem('thread_id', data.thread_id);
+            console.log(data); // Log the response data to debug
+
+            if (data.messages) {
+                data.messages.forEach(msg => addMessage(msg.role, msg.message));
+                localStorage.setItem('thread_id', data.thread_id);
+            } else {
+                console.error('No response from server');
+            }
+
+            document.getElementById('message').value = '';
+        }
+
+        function addMessage(role, content) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(role === 'user' ? 'user-message' : 'assistant-message');
+            messageDiv.innerText = content;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function startNewThread() {
+            localStorage.removeItem('thread_id');
+            document.getElementById('chat-box').innerHTML = '';
         }
     </script>
 </head>
 <body>
-    <h1>IMC Cover Letter</h1>
-    <input type="text" id="message" placeholder="Type your message here">
-    <button onclick="sendMessage()">Send</button>
-    <p id="response"></p>
+    <div class="chat-container">
+        <div id="chat-box" class="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="message" placeholder="Type your message here">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="startNewThread()">New Thread</button>
+        </div>
+    </div>
 </body>
 </html>

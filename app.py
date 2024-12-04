@@ -48,24 +48,47 @@ def chat():
     )
 
     if run.status == 'completed':
-        messages = client.beta.threads.messages.list(thread_id=thread_id)
+        messages = list(client.beta.threads.messages.list(thread_id=thread_id))
+
+        logging.info(messages)
 
         # Log the content of the messages
         logging.info("messages: ")
 
-        response_message = ""
+        response_messages = []
 
-        for message in messages:
-            assert message.content[0].type == "text"
-            logging.info({"role": message.role, "message": message.content[0].text.value})
-            response_message += message.content[0].text.value
+        user_message = None
+        assistant_message = None
 
-        response_message = response_message.strip()
+        for msg in messages:
+            if msg.role == "user" and user_message is None:
+                user_message = msg
+            elif msg.role == "assistant" and assistant_message is None:
+                assistant_message = msg
+            if user_message and assistant_message:
+                break
+
+        if user_message and assistant_message:
+            assert user_message.content[0].type == "text"
+            assert assistant_message.content[0].type == "text"
+            logging.info({"role": user_message.role, "message": user_message.content[0].text.value})
+            logging.info({"role": assistant_message.role, "message": assistant_message.content[0].text.value})
+            response_messages.append({
+                'role': user_message.role,
+                'message': user_message.content[0].text.value
+            })
+            response_messages.append({
+                'role': assistant_message.role,
+                'message': assistant_message.content[0].text.value
+            })
+        else:
+            response_messages = [{"role": "system", "message": "Error: Run did not complete successfully."}]
+
     else:
-        response_message = "Error: Run did not complete successfully."
+        response_messages = [{"role": "system", "message": "Error: Run did not complete successfully."}]
 
     return jsonify({
-        'response': response_message,
+        'messages': response_messages,
         'thread_id': thread_id
     })
 
