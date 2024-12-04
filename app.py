@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import logging
 
-logging.basicConfig(level=logging.CRITICAL)  # Disable logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -51,13 +51,14 @@ def chat():
         messages = client.beta.threads.messages.list(thread_id=thread_id)
 
         # Log the content of the messages
-        # logging.info("messages: ")
+        logging.info("messages: ")
+
         response_message = ""
 
         for message in messages:
             assert message.content[0].type == "text"
-            # logging.info({"role": message.role, "message": message.content[0].text.value})
-            response_message += message.content[0].text.value + "\n"
+            logging.info({"role": message.role, "message": message.content[0].text.value})
+            response_message += message.content[0].text.value
 
         response_message = response_message.strip()
     else:
