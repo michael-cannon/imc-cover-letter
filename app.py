@@ -10,11 +10,11 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-# Set your OpenAI API key, model, and assistant ID from environment variables
+# Set your OpenAI API model and assistant ID from environment variables
 openai_model = os.getenv('OPENAI_MODEL')
 assistant_id = os.getenv('ASSISTANT_ID')
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 @app.route('/')
 def index():
@@ -39,7 +39,7 @@ def generate_text():
         ]
     )
 
-    return jsonify({"text": response.choices[0].message.strip()})
+    return jsonify({"text": response.choices[0].message.content.strip()})
 
 if __name__ == "__main__":
     app.run()
