@@ -8,18 +8,24 @@
     <script>
         async function sendMessage() {
             const message = document.getElementById('message').value;
-            let threadId = localStorage.getItem('thread_id') || '';
+            const threadId = localStorage.getItem('thread_id') || '';
+            const fileInput = document.getElementById('file-input');
+            const files = fileInput.files;
 
             // Show spinner and hide Send button
             document.getElementById('spinner').style.display = 'inline-block';
             document.getElementById('send-button').style.display = 'none';
 
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('thread_id', threadId);
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
             const response = await fetch('/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message, thread_id: threadId })
+                body: formData
             });
 
             const data = await response.json();
@@ -33,6 +39,7 @@
             }
 
             document.getElementById('message').value = '';
+            document.getElementById('file-input').value = '';
             // Hide spinner and show Send button
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('send-button').style.display = 'inline-block';
@@ -60,6 +67,7 @@
         <div id="chat-box" class="chat-box"></div>
         <div class="input-container">
             <input type="text" id="message" placeholder="Type your message here">
+            <input type="file" id="file-input" multiple>
             <div id="spinner" class="spinner" style="display: none;"></div>
             <button id="send-button" onclick="sendMessage()">Send</button>
             <button onclick="startNewThread()">New Thread</button>

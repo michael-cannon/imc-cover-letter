@@ -1,9 +1,10 @@
 from flask import request, jsonify
 from openai import OpenAI
-import os
+import io
 import logging
+import os
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.CRITICAL)
 
 api_key = os.getenv('OPENAI_API_KEY')
 assistant_id = os.getenv('ASSISTANT_ID')
@@ -11,30 +12,61 @@ assistant_id = os.getenv('ASSISTANT_ID')
 client = OpenAI(api_key=api_key)
 
 def chat_route():
-    data = request.json
+    data = request.form
     message = data.get('message', '')
     thread_id = data.get('thread_id', None)
+    files = request.files.getlist('files')
 
-    if not message:
-        return jsonify({'error': 'No message provided'}), 400
+    logging.info(request)
+    logging.info(files)
+
+    if not message and not files:
+        return jsonify({'error': 'No message or files provided'}), 400
 
     # Step 2: Create a Thread if not provided
     if not thread_id:
         thread = client.beta.threads.create()
         thread_id = thread.id
 
-    # Step 3: Add a Message to the Thread
+    attachments = []
+
+    # Step 3: Upload Files
+    if files:
+        for file in files:
+            logging.info(file)
+
+            # Use an in-memory file object
+            file_stream = io.BytesIO(file.read())
+
+            # Add a name attribute for OpenAI
+            file_stream.name = file.filename
+            logging.info(file_stream)
+
+            upload_response = client.files.create(
+                file=file_stream,
+                purpose="assistants"
+            )
+            logging.info(upload_response)
+            attachments.append({
+                "file_id": upload_response.id,
+                "tools": [{"type": "file_search"}]
+            })
+
+    # Step 4: Add a Message to the Thread
     client.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
-        content=message
+        content=message,
+        attachments=attachments
     )
 
-    # Step 4: Create a Run
+    # Step 5: Create a Run
     run = client.beta.threads.runs.create_and_poll(
         thread_id=thread_id,
         assistant_id=assistant_id
     )
+
+    response_messages = []
 
     if run.status == 'completed':
         messages = list(client.beta.threads.messages.list(thread_id=thread_id))
@@ -44,12 +76,11 @@ def chat_route():
         # Log the content of the messages
         logging.info("messages: ")
 
-        response_messages = []
-
         user_message = None
         assistant_message = None
 
         for msg in messages:
+            logging.info(msg)
             if msg.role == "user" and user_message is None:
                 user_message = msg
             elif msg.role == "assistant" and assistant_message is None:
@@ -72,9 +103,6 @@ def chat_route():
             })
         else:
             response_messages = [{"role": "system", "message": "Error: Run did not complete successfully."}]
-
-    else:
-        response_messages = [{"role": "system", "message": "Error: Run did not complete successfully."}]
 
     return jsonify({
         'messages': response_messages,
