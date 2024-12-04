@@ -1,20 +1,7 @@
-document.getElementById('login-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password })
-    });
-    if (response.ok) {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('generate-form').style.display = 'block';
-    } else {
-        alert('Login failed');
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('generate-form').style.display = 'block';
 });
 
 document.getElementById('generate-form').addEventListener('submit', async function(event) {

@@ -9,7 +9,9 @@
 <body>
     <h1>Cover Letter Generator</h1>
     {% include 'login_form.html' %}
-    {% include 'generate_form.html' %}
+    <div id="dashboard" style="display:none;">
+        {% include 'generate_form.html' %}
+    </div>
     <div id="result"></div>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
