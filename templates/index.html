@@ -7,24 +7,24 @@
     <script>
         async function sendMessage() {
             const message = document.getElementById('message').value;
-            const conversationId = localStorage.getItem('conversation_id') || null;
+            const threadId = localStorage.getItem('thread_id') || null;
 
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message, conversation_id: conversationId })
+                body: JSON.stringify({ message, thread_id: threadId })
             });
 
             const data = await response.json();
             document.getElementById('response').innerText = data.response;
-            localStorage.setItem('conversation_id', data.conversation_id);
+            localStorage.setItem('thread_id', data.thread_id);
         }
     </script>
 </head>
 <body>
-    <h1>Hello there!</h1>
+    <h1>IMC Cover Letter</h1>
     <input type="text" id="message" placeholder="Type your message here">
     <button onclick="sendMessage()">Send</button>
     <p id="response"></p>

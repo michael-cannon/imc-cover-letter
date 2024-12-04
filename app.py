@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.CRITICAL)  # Disable logging
 
 app = Flask(__name__)
 
@@ -12,7 +12,7 @@ load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 assistant_id = os.getenv('ASSISTANT_ID')
 
-client = OpenAI(api_key = api_key)
+client = OpenAI(api_key=api_key)
 
 
 @app.route('/')
@@ -24,36 +24,39 @@ def index():
 def chat():
     data = request.json
     message = data.get('message', '')
+    thread_id = data.get('thread_id', None)
 
     if not message:
         return jsonify({'error': 'No message provided'}), 400
 
-    # Step 2: Create a Thread
-    thread = client.beta.threads.create()
+    # Step 2: Create a Thread if not provided
+    if not thread_id:
+        thread = client.beta.threads.create()
+        thread_id = thread.id
 
     # Step 3: Add a Message to the Thread
     client.beta.threads.messages.create(
-        thread_id=thread.id,
+        thread_id=thread_id,
         role="user",
         content=message
     )
 
     # Step 4: Create a Run
     run = client.beta.threads.runs.create_and_poll(
-        thread_id=thread.id,
+        thread_id=thread_id,
         assistant_id=assistant_id
     )
 
     if run.status == 'completed':
-        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        messages = client.beta.threads.messages.list(thread_id=thread_id)
 
         # Log the content of the messages
-        logging.info("messages: ")
+        # logging.info("messages: ")
         response_message = ""
 
         for message in messages:
             assert message.content[0].type == "text"
-            logging.info({"role": message.role, "message": message.content[0].text.value})
+            # logging.info({"role": message.role, "message": message.content[0].text.value})
             response_message += message.content[0].text.value + "\n"
 
         response_message = response_message.strip()
@@ -61,7 +64,8 @@ def chat():
         response_message = "Error: Run did not complete successfully."
 
     return jsonify({
-        'response': response_message
+        'response': response_message,
+        'thread_id': thread_id
     })
 
 
