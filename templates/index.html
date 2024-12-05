@@ -15,6 +15,7 @@
             // Show spinner and hide Send button
             document.getElementById('spinner').style.display = 'inline-block';
             document.getElementById('send-button').style.display = 'none';
+            document.getElementById('thread-button').style.display = 'none';
 
             const formData = new FormData();
             formData.append('message', message);
@@ -43,6 +44,7 @@
             // Hide spinner and show Send button
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('send-button').style.display = 'inline-block';
+            document.getElementById('thread-button').style.display = 'inline-block';
         }
 
         function addMessage(role, content) {
@@ -67,10 +69,14 @@
         <div id="chat-box" class="chat-box"></div>
         <div class="input-container">
             <textarea id="message" placeholder="Type your message here"></textarea>
+        </div>
+        <div class="upload-container">
             <input type="file" id="file-input" multiple>
+        </div>
+        <div class="submit-container">
             <div id="spinner" class="spinner" style="display: none;"></div>
             <button id="send-button" onclick="sendMessage()">Send</button>
-            <button onclick="startNewThread()">New Thread</button>
+            <button id="thread-button" onclick="startNewThread()">New Thread</button>
         </div>
     </div>
 </body>
