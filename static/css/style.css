@@ -89,6 +89,15 @@ footer {
     margin-right: 10px;
 }
 
+.input-container textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+    resize: vertical; /* Allow vertical resizing */
+}
+
 .input-container button {
     padding: 10px 20px;
     border: none;
